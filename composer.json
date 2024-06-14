@@ -1,0 +1,17 @@
+{
+    "name": "trero/awning",
+    "description": "Check hash all file root app and filter request HTTP.",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Trero\\Awning\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Luigi Matteoni",
+            "email": "trerogig@gmail.com"
+        }
+    ],
+    "require": {}
+}
