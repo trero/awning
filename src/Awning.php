@@ -16,23 +16,32 @@ class Awning
         $checksum = new AwningChecksum;
         $checksum->checksum_array = json_encode($res);
         $checksum->save();
-        Log::info($res);
+        //Log::info(json_decode($checksum->checksum_array));
 
-        //$this->checkDiffereceWithPastChecksum($checksum);
+        $this->checkDiffereceWithPastChecksum($checksum);
 
     }
 
     private function getListFilesDirectories($dir, &$results = array())
     {
         $files = scandir($dir);
-    
+        $count= 0;
+
         foreach ($files as $key => $value) {
+
             $path = realpath($dir . DIRECTORY_SEPARATOR . $value);
+
             if (!is_dir($path)) {
-                $results[] = array( $path, $this->calculateFileChecksum($path));
+
+                $results[] = array(
+                    'path' => $path,
+                    'checksum' => $this->calculateFileChecksum($path)
+                );
+
             } else if ($value != "." && $value != "..") {
+
                 $this->getListFilesDirectories($path, $results);
-                $results[] = $path;
+                $results[] = array('dir' => $path);
             }
         }
 
@@ -60,8 +69,32 @@ class Awning
 
     protected function checkDiffereceWithPastChecksum(AwningChecksum $checksum)
     {
-        $cs = json_decode($checksum->checksum_array);
-        Log::info($cs);        
+        $secondLast = AwningChecksum::orderBy('created_at', 'desc')->skip(1)->take(1)->first();
+        $arsl = json_decode($secondLast->checksum_array);
+        $cs = json_decode($checksum->checksum_array, false);
+
+        //Log::info($checksum->checksum_array);
+        foreach ($cs as $item) {
+            if (property_exists($item, 'path')) {
+                foreach ($arsl as $value) {
+                    if (property_exists($value, 'path') && $item->path == $value->path) {
+                        Log::info($value->path);
+                        $value->checksum != $item->checksum ? Log::info('diverso') : Log::info('uguale');
+                    }
+                }
+                //Log::info($item->path);
+            }
+            /*if (is_array($item) && array_key_exists('1', $item)) {
+                if (!is_dir($item[0])) {
+                    //in_array($item[0], $arsl) ? Log::info('presente') : '';
+                    //array_search( $item[0], array_column($cs, 1)) ? Log::info('presente') : Log::info('non');
+                }
+            } else {
+
+            }*/
+
+            //Log::info($item);
+        }
 
     }
 
